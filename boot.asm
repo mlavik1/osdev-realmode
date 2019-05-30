@@ -1,15 +1,40 @@
 [org 0x7c00]
-mov bp, 0x8000 ; set the stack pointer
-mov sp, bp
 
-mov bx, 0x9000 ; es:bx <- where to store the data
-mov dh, 2 ; dh <- number of sectors to read
-call disk_load
+jmp boot_start
 
-; run OS
-jmp 0x9000
+OEM_ID                db 		"MING-OS " ; 11 bytes
+BytesPerSector        dw 		0x0200
+SectorsPerCluster     db 		0x08
+ReservedSectors       dw 		0x0020
+FATs                  db 		0x01
+RootEntries           dw 		0x0000
+SmallSectors          dw 		0x0000
+MediaDescriptor       db 		0xF8
+SectorsPerFAT         dw 		0x0000
+SectorsPerTrack       dw 		0x003D
+Heads                 dw 		0x0002
+HiddenSectors         dd 		0x00000000
+TotalSectors     	    dd 		0x00FE3B1F		
 
-jmp $
+DriveNumber           db 		0x00
+CurrentHead           db   	0x00
+Signature             db 		0x29
+VolumeID              dd 		0xFFFFFFFF
+VolumeLabel           db 		"MINGOS BOOT" ; 11 bytes
+SystemID              db 		"FAT16   "
+
+boot_start:
+  mov bp, 0x8000 ; set the stack pointer
+  mov sp, bp
+
+  mov bx, 0x9000 ; es:bx <- where to store the data
+  mov dh, 2 ; dh <- number of sectors to read
+  call disk_load
+
+  ; run OS
+  jmp 0x9000
+
+  jmp $
 
 ; load 'dh' sectors from drive 'dl' into ES:BX
 disk_load:
