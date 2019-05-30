@@ -44,8 +44,19 @@ _handle_right:
 
 cli_enter:
   call print_newline
+  
+  ; parse input
+  push INPUT_TEXT
+  push ' '
+  push CURR_CMD
+  call parse_string
+  add esp, 6
+  ; increment and store return pointer
+  add ax, 1
+  mov [CURR_ARGS], ax ; TODO: pass to function that handles command
+  
 _cli_test_echo:
-  mov bx, INPUT_TEXT
+  mov bx, CURR_CMD
   push bx
   mov bx, STR_CMD_ECHO
   push bx
@@ -66,7 +77,7 @@ _cli_clear_return:
   ret
   
 cli_echo:
-  push INPUT_TEXT
+  push word [CURR_ARGS]
   call print_string
   pop bx
   call print_newline
@@ -102,6 +113,8 @@ STR_ERR_INVALCMD db "Invalid command",0
   
 CURSOR_POS dw 0x0000
 INPUT_TEXT times 256 dw 0x00
+CURR_CMD times 16 db 0x00
+CURR_ARGS dw 0x0000
 
 ; *** CONSTANTS ***
 SCANCODE_LEFT equ 0x4b00

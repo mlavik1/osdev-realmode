@@ -33,6 +33,15 @@ print_string:
     jne _print_string_loop
   ret
 
+; -------------------- [ Routine: print_newline ] --------------------
+print_newline:
+  mov ah, 0x0e ; tty
+  mov al, 10 ;LF
+  int 0x10
+  mov al, 13 ;CR
+  int 0x10
+  ret
+  
 ; -------------------- [ Routine: compare_strings ] --------------------
 ; --------------------------- compares two strings ----------------------------
 ; input: [esp+4] = string a
@@ -64,11 +73,30 @@ compare_strings:
     ret
   ret
 
-; -------------------- [ Routine: print_newline ] --------------------
-print_newline:
-  mov ah, 0x0e ; tty
-  mov al, 10 ;LF
-  int 0x10
-  mov al, 13 ;CR
-  int 0x10
+; -------------------- [ Routine: parse_string ] --------------------
+; -------------------- parses a delimited string --------------------
+; input: [esp+6] = input string
+; input: [esp+4] = delimiter
+; input: [esp+2] = (output) parsed string
+; return: ax = current position (at delimiter or null terminator)
+parse_string:
+  mov dx, [esp+4] ; delim
+  mov cx, 0 ; counter
+  _parse_string_loop:
+    mov bx, [esp+6] ; input
+    add bx, cx
+    mov ax, [bx]
+    cmp al, dl ; delimiter?
+    je _parse_string_delim
+    cmp al, 0x00 ; null terminator?
+    je _parse_string_delim
+    ; write to output string
+    mov bx, [esp+2] ; output
+    add bx, cx
+    mov [bx], al
+    ; increment counter
+    inc cx
+    jmp _parse_string_loop
+  _parse_string_delim:
+  mov ax, bx
   ret
