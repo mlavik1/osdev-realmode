@@ -106,6 +106,12 @@ cli_clear:
   push 0x00
   call memset
   add esp, 6
+  ; clear cmd text
+  push word CURR_CMD
+  push 0x0010
+  push 0x00
+  call memset
+  add esp, 6
   ret
 
 STR_CMD_ECHO db "echo",0
