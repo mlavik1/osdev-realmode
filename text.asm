@@ -8,6 +8,16 @@ print_char:
   int 0x10
   ret
 
+; -------------------- [ Routine: print_char_at_cursor ] --------------------
+; ----------------------- prints a character at cursor ----------------------
+; IN: al = character to print
+print_char_at_cursor:
+  mov ah, 0x0a
+  mov bh, 0x00
+  mov cx, 0x01
+  int 0x10
+  ret
+
 ; -------------------- [ Routine: print_string ] --------------------
 ; --------------------------- prints a string ----------------------------
 ; input: [esp+2] address of string

@@ -27,6 +27,7 @@ _user_input:
   mov word [INPUT_TEXT], 0x0000  ; TODO: make memcpy function !!! (clear 256 bytes)
 _user_input_start:
   call read_keypress
+  
   ; handle special scan codes
   cmp al, 0x0d
   je _handle_enter
@@ -34,18 +35,28 @@ _user_input_start:
   je _handle_left
   cmp ax, SCANCODE_RIGHT
   je _handle_right
+  cmp al, 0x08
+  je _handle_bksp
+  
   ; print (if not special scan code)
   call print_char
   jmp _user_input_start
+  
   ; move cursor left
 _handle_left:
   call move_cursor_left
   jmp _loop
   ; move cursor right
+  
 _handle_right:
   call move_cursor_right
   jmp _loop
   ; execute
+_handle_bksp:
+  call move_cursor_left
+  mov al, ' '
+  call print_char_at_cursor
+  jmp _loop
 _handle_enter:
   call print_newline
   mov bx, STR_CMD_ECHO
