@@ -2,29 +2,22 @@
 
 mov bp, 0x8000
 
-; TEST: memset two bytes of the welcome message
-push word STR_WELCOME_MESSAGE
-push 0x0002
-push 0x26
-call memset
-pop ax
-pop ax
-pop ax
-
 ; show welcome message
-mov bx, STR_WELCOME_MESSAGE
-push bx
+push STR_WELCOME_MESSAGE
 call print_string
 pop bx
 
 call print_newline
 
-
 ; read user input - TODO: move to separate file? (make re-usable functions/labels?)
 _user_input:
   ; reset relative cursor pos and input text
   mov word [CURSOR_POS], 0x0000
-  mov word [INPUT_TEXT], 0x0000  ; TODO: make memcpy function !!! (clear 256 bytes)
+  push word INPUT_TEXT
+  push 0x0100
+  push 0x00
+  call memset
+  add esp, 4
 _user_input_start:
   call read_keypress
   
@@ -32,34 +25,44 @@ _user_input_start:
   cmp al, 0x0d
   je _handle_enter
   cmp ax, SCANCODE_LEFT
-  je _handle_left
+  je _handle_bksp
   cmp ax, SCANCODE_RIGHT
-  je _handle_right
+  je _loop
   cmp al, 0x08
   je _handle_bksp
   
   ; print (if not special scan code)
   call print_char
+  ; store character
+  mov dx, [CURSOR_POS]
+  mov bx, INPUT_TEXT
+  add bx, dx
+  mov byte [bx], al
+  ; increment cursor pos
+  inc dx
+  mov [CURSOR_POS], dx
+  ; loop
   jmp _user_input_start
   
-  ; move cursor left
-_handle_left:
-  call move_cursor_left
-  jmp _loop
-  ; move cursor right
-  
-_handle_right:
-  call move_cursor_right
-  jmp _loop
   ; execute
 _handle_bksp:
   call move_cursor_left
   mov al, ' '
   call print_char_at_cursor
+  ; decrement cursor pos
+  mov dx, [CURSOR_POS]
+  dec dx
+  mov [CURSOR_POS], dx
+  ; erase character
+  mov bx, INPUT_TEXT
+  add bx, dx
+  mov word [bx], 0x00
   jmp _loop
+  
 _handle_enter:
   call print_newline
-  mov bx, STR_CMD_ECHO
+_test_echo:
+  mov bx, INPUT_TEXT
   push bx
   mov bx, STR_CMD_ECHO
   push bx
@@ -67,24 +70,34 @@ _handle_enter:
   pop bx
   pop bx
   test ax, ax
-  je _handle_match
-  mov al, 'n'
-  call print_char
-  call _loop
-_handle_match:
-  mov al, 'y'
-  call print_char
+  jne _invalid_command
+  call echo
+  jmp _user_input
+_invalid_command:
+  push STR_ERR_INVALCMD
+  call print_string
+  pop bx
+  call print_newline
+  jmp _user_input
 _loop:
   jmp _user_input_start
 
 ; infinite loop
 jmp $
 
+echo:
+  push INPUT_TEXT
+  call print_string
+  pop bx
+  call print_newline
+  ret
+
 %include "io.asm"
 %include "text.asm"
 %include "memory.asm"
 
 STR_CMD_ECHO db "echo",0
+STR_ERR_INVALCMD db "Invalid command",0
 
 STR_WELCOME_MESSAGE db "******* MingOS *******", 0x0a, 0x0d,\
                    "Welcome to MingOS!",0 ; null-terminated (,0) and with LF (0x0a) and CR (0x0d)

@@ -48,13 +48,6 @@ compare_strings:
     add bx, cx
     mov dl, [bx] ;dl = b
     
-    ; DEBUG: print characters
-    ;mov ah, 0x0e
-    ;mov al, dh
-    ;int 0x10
-    ;mov al, dl
-    ;int 0x10
-    
     cmp dh, dl
     jne _compare_string_ret_ne ; not equal
     test dh, dh
