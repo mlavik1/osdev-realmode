@@ -14,11 +14,11 @@ move_cursor_left:
   mov bh, 0x00
   int 0x10
   test dl, dl
-  je _move_cursor_left_ret
+  je .return
   dec dl
   mov ah, 0x02
   int 0x10
-  _move_cursor_left_ret:
+  .return:
   ret
 
 ; -------------------- [ Routine: move_cursor_right ] --------------------
