@@ -100,3 +100,38 @@ parse_string:
   .delim:
   mov ax, bx
   ret
+
+; -------------------- [ Routine: print_hex ] --------------------
+; ------------ prints the hex representation of a word -----------
+; input: [esp+2] = word to print
+print_hex:
+; print '0x'
+  mov al, '0'
+  call print_char
+  mov al, 'x'
+  call print_char
+  ; print high nybble
+  mov ax, [esp+2]
+  shr ax, 4
+  call print_nybble_hex
+  ; print low nybble
+  mov ax, [esp+2]
+  and ax, 0x0f
+  call print_nybble_hex
+  ret
+
+
+
+; *** INTERNAL ROUTINES ***
+
+print_nybble_hex:
+  cmp al, 0x09
+  jg .greater
+  .less:
+  add al, 48
+  call print_char
+  ret
+  .greater:
+  add al, 55
+  call print_char
+  ret
