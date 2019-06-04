@@ -28,7 +28,7 @@ boot_start:
   mov sp, bp
 
   mov bx, 0x9000 ; es:bx <- where to store the data
-  mov dh, 2 ; dh <- number of sectors to read
+  mov dh, 4 ; dh <- number of sectors to read
   call disk_load
 
   ; run OS
