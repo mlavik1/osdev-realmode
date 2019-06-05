@@ -1,7 +1,5 @@
 [org 0x9000]
 
-mov bp, 0x8000
-
 ; show welcome message
 push STR_WELCOME_MESSAGE
 call print_string
@@ -9,6 +7,11 @@ pop bx
 
 call print_newline
 
+; test disk IO
+call test_disk_io
+call print_newline
+
+; initialise and handle CLI
 call cli_init
 _user_input:
 
@@ -22,7 +25,9 @@ jmp $
 %include "io.asm"
 %include "text.asm"
 %include "memory.asm"
+%include "disk_io.asm"
 %include "cli.asm"
+%include "tests.asm"
 
 STR_WELCOME_MESSAGE db "******* MingOS *******", 0x0a, 0x0d,\
                    "Welcome to MingOS!",0 ; null-terminated (,0) and with LF (0x0a) and CR (0x0d)

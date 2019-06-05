@@ -110,13 +110,23 @@ print_hex:
   call print_char
   mov al, 'x'
   call print_char
+  ; higher byte
   ; print high nybble
-  mov ax, [esp+2]
-  shr ax, 4
+  mov al, [esp+3]
+  shr al, 4
   call print_nybble_hex
   ; print low nybble
-  mov ax, [esp+2]
-  and ax, 0x0f
+  mov al, [esp+3]
+  and al, 0x0f
+  call print_nybble_hex
+  ; lower byte
+  ; print high nybble
+  mov al, [esp+2]
+  shr al, 4
+  call print_nybble_hex
+  ; print low nybble
+  mov al, [esp+2]
+  and al, 0x0f
   call print_nybble_hex
   ret
 
